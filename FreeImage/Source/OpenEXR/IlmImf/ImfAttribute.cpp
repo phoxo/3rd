@@ -47,6 +47,7 @@
 #include <map>
 
 #include "ImfNamespace.h"
+#include <functional>
 
 OPENEXR_IMF_INTERNAL_NAMESPACE_SOURCE_ENTER 
 

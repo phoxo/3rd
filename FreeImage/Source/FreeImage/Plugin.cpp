@@ -276,69 +276,6 @@ FreeImage_Initialise(BOOL load_local_plugins_only) {
 			s_plugins->AddNode(InitJXR);
 #endif // unsupported by MS Visual Studio 2003 !!!
 			
-			// external plugin initialization
-
-#ifdef _WIN32
-			if (!load_local_plugins_only) {
-				int count = 0;
-				char buffer[MAX_PATH + 200];
-				wchar_t current_dir[2 * _MAX_PATH], module[2 * _MAX_PATH];
-				BOOL bOk = FALSE;
-
-				// store the current directory. then set the directory to the application location
-
-				if (GetCurrentDirectoryW(2 * _MAX_PATH, current_dir) != 0) {
-					if (GetModuleFileNameW(NULL, module, 2 * _MAX_PATH) != 0) {
-						wchar_t *last_point = wcsrchr(module, L'\\');
-
-						if (last_point) {
-							*last_point = L'\0';
-
-							bOk = SetCurrentDirectoryW(module);
-						}
-					}
-				}
-
-				// search for plugins
-
-				while (count < s_search_list_size) {
-					_finddata_t find_data;
-					long find_handle;
-
-					strcpy(buffer, s_search_list[count]);
-					strcat(buffer, "*.fip");
-
-					if ((find_handle = (long)_findfirst(buffer, &find_data)) != -1L) {
-						do {
-							strcpy(buffer, s_search_list[count]);
-							strncat(buffer, find_data.name, MAX_PATH + 200);
-
-							HINSTANCE instance = LoadLibrary(buffer);
-
-							if (instance != NULL) {
-								FARPROC proc_address = GetProcAddress(instance, "_Init@8");
-
-								if (proc_address != NULL) {
-									s_plugins->AddNode((FI_InitProc)proc_address, (void *)instance);
-								} else {
-									FreeLibrary(instance);
-								}
-							}
-						} while (_findnext(find_handle, &find_data) != -1L);
-
-						_findclose(find_handle);
-					}
-
-					count++;
-				}
-
-				// restore the current directory
-
-				if (bOk) {
-					SetCurrentDirectoryW(current_dir);
-				}
-			}
-#endif // _WIN32
 		}
 	}
 }
